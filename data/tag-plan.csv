@@ -1,0 +1,60 @@
+﻿tag_id,folder,tag_name,tag_type,ga4_event,trigger_name,trigger_condition,datalayer_deps,blockers,pii_risk,phase,priority,owner,qa_case,status,notes
+T000,00 Core,ga4_cfg_base,GA4 Config,(page_view),tl_all_pages,All Pages,"page_type,logged_in,dl_ver",cbk_block_internal,none,0,P0,Data,"T-01,T-02",to_build,send page view ON; measurement id from v_cv_ga4_id
+T001,00 Core,html_consent_init,Custom HTML,-,tl_all_pages,"Page View (priority 1, first)",consent_state,none,none,0,P0,Data,T-13,to_build,consent default+update; must precede all tags
+T002,00 Core,html_dl_shim,Custom HTML,-,tl_all_pages,Once per page,-,none,none,0,P0,FE,"T-02,T-07",conditional,only if path B (no template access); load snippets/titana-datalayer.js
+T003,00 Core,ga4_set_user_props,GA4 Event,user_update,evt_identity + dom_ready,user.uid_hash present,"role,city,province,org_type,implants_band,club_tier,primary_system",cbk_block_internal,low,0,P0,Data,T-10,to_build,fire on login + every page when user known
+T004,00 Core,ga4_evt_error_view,GA4 Event,error_view,tl_all_pages,document.title/path matches 404|500,"error_code,nav.from",none,none,0,P1,Data,T-14,to_build,catches /leasing-404/ traffic
+T005,00 Core,ga4_evt_internal_flag,GA4 Event,internal_traffic,tl_all_pages,v_js_is_internal_traffic = true,-,none,none,0,P1,Data,T-12,to_build,"mark, do not delete; filter in GA4 UI"
+T006,00 Core,ga4_evt_schema_mismatch,GA4 Event,schema_mismatch,tl_all_pages,required param missing,"event_name,missing_keys",none,none,0,P1,FE,T-17,to_build,data-quality tripwire
+T007,00 Core,clarity_install,Custom HTML (Clarity),-,tl_all_pages,granted,-,cbk_block_preview,medium,0,P2,CRO,T-15,optional,session replay + heatmaps; exclude PDP-price pages if PII risk
+T100,06 Identity&Consent,ga4_evt_login_gate,GA4 Event,login_gate_hit,custom_login_gate_hit,event=titana_login_gate_hit,"blocked_action,target_page,product_id",cbk_block_internal,none,1,P0,Product,T-10,to_build,THE key B2B metric
+T101,06 Identity&Consent,ga4_evt_otp_send,GA4 Event,otp_send,custom_otp_send,-,"method,phone_valid",none,low,1,P0,Product,T-10,to_build,never send raw phone
+T102,06 Identity&Consent,ga4_evt_otp_result,GA4 Event,otp_result,custom_otp_result,-,"result,error_code,attempts",none,low,1,P0,Product,T-10,to_build,
+T103,06 Identity&Consent,ga4_evt_signup,GA4 Event,signup,custom_signup,result=ok,"role,city,has_capacity_field",cbk_once_per_session,low,1,P0,Growth,T-10,to_build,mark key event
+T104,06 Identity&Consent,ga4_evt_profile_complete,GA4 Event,profile_complete,custom_profile_complete,-,"implants_band,org_type,primary_systems",none,low,1,P0,Growth,T-10,to_build,mark key event
+T105,00 Core,ga4_evt_enh_conv_leads,GA4 Event (+enhanced conv),form_submit,evt_leads,"form_id in (quote,callback)","hashed_phone,email_hash - GA4 EC only",cbk_no_hash_from_dom,medium,1,P2,Data,T-17,conditional,only with form-level dev support
+T200,01 GA4,ga4_evt_router_commerce,GA4 Event (router),{{v_dl_event_name_stripped}},evt_ecom,see 4.6,"items[],value,currency + shared set",cbk_block_0_price_revenue,low,1,P0,Data,T-04..T-09,to_build,"single tag, event name from dataLayer"
+T201,02 Ecommerce,ga4_evt_view_item,GA4 Event,view_item,evt_ecom,event=titana_product_detail,"items[product_id,item_name,index,brand_id,variant,price,availability]",cbk_block_internal,none,1,P0,Data,"T-06,T-07",to_build,explicit tag (not router) - highest usage
+T202,02 Ecommerce,ga4_evt_select_item,GA4 Event,select_item,evt_ecom,event=titana_product_click,"items[],index,list",none,none,1,P0,Data,T-09,to_build,
+T203,02 Ecommerce,ga4_evt_view_item_list,GA4 Event,view_item_list,evt_ecom,event=titana_product_impression,items[],none,none,1,P2,Data,T-16,to_build,10% sample via v_js_sample
+T204,02 Ecommerce,ga4_evt_add_to_cart,GA4 Event,add_to_cart,evt_ecom,event=titana_add_to_cart,"items[],value,currency,source_page_type,cta_id",cbk_block_test_orders,low,1,P0,Data,T-09,to_build,
+T205,02 Ecommerce,ga4_evt_remove_from_cart,GA4 Event,remove_from_cart,evt_ecom,event=titana_remove_from_cart,items[],none,none,1,P1,CRO,T-09,to_build,
+T206,02 Ecommerce,ga4_evt_view_cart,GA4 Event,view_cart,evt_ecom,event=titana_cart_view,"line_count,items_count,value_toman,cod_available",none,none,1,P0,CRO,T-05,to_build,
+T207,02 Ecommerce,ga4_evt_begin_checkout,GA4 Event,begin_checkout,evt_ecom,step=1,"value,items[]",none,none,1,P0,CRO,T-05,blocked_no_access,needs authenticated checkout access
+T208,02 Ecommerce,ga4_evt_checkout_progress,GA4 Event,checkout_step,evt_ecom,step=2..n,"step,step_name,option",none,none,1,P1,CRO,T-05,blocked_no_access,
+T209,02 Ecommerce,ga4_evt_add_ship_pay,GA4 Event,add_shipping_info + add_payment_info,evt_ecom,option selected,"option_type,option",none,low,1,P1,CRO,T-05,blocked_no_access,
+T210,02 Ecommerce,ga4_evt_purchase,GA4 Event,purchase,evt_ecom,event=titana_purchase,"transaction_id,value,tax,shipping,coupon,currency,items[]",cbk_once_purchase + cbk_block_test_orders,low,1,P0,Data,"T-04,T-05,T-06",blocked_no_access,dedupe on order_id in sessionStorage; value in RIAL
+T211,02 Ecommerce,ga4_evt_refund,GA4 Event,refund,evt_offline_import,panel webhook,"transaction_id,value",none,low,2,P2,Data,T-05,to_build,server import not browser
+T212,02 Ecommerce,ga4_evt_variant,GA4 Event,variant_list_expand + select_variant + variant_index_view,evt_ecom,variant events,"product_id,diameter,length,platform,qty,time_to_select_ms",none,none,1,P1,CRO,T-08,to_build,router tag for 3 events
+T213,02 Ecommerce,ga4_evt_availability,GA4 Event,availability_view,evt_ecom,badge seen,"availability,stock_units_bucket,product_id",none,none,1,P2,Supply,T-07,to_build,stock parsing from «N واحد در انبار»
+T214,02 Ecommerce,ga4_evt_oos_demand,GA4 Event,notify_me_submit,evt_leads,back-in-stock form,"product_id,requested_qty,avg_price_toman",none,low,2,P1,Supply,T-09,to_build,revenue recovery
+T300,03 Leads,ga4_evt_router_leads,GA4 Event (router),{{v_dl_event_name_stripped}},evt_leads,see 4.6,"form_id,tool,product_id",cbk_block_internal,low,2,P0,Growth,T-09,to_build,
+T301,03 Leads,ga4_evt_quote_request,GA4 Event,quote_request,evt_leads,event=titana_quote_request,"product_id,package_size,offer_type",cbk_block_0_price_revenue,low,2,P0,Sales,T-06,to_build,key event for undisclosed-price packages
+T302,03 Leads,ga4_evt_callback_request,GA4 Event,callback_request,evt_leads,/form/callreq success,"form_id,preferred_time,page_type",cbk_once_per_session,medium,2,P0,Sales,T-09,to_build,key event
+T303,03 Leads,ga4_evt_form_start,GA4 Event,form_start,tl_form_focus + custom,first focus,"form_id,form_name,field_count",none,none,2,P1,CRO,T-10,to_build,
+T304,03 Leads,ga4_evt_form_submit,GA4 Event,form_submit,evt_leads,ajax response,"form_id,result,error_code,time_to_complete_ms",none,medium,2,P0,CRO,T-10,to_build,
+T305,04 Tools&Instruments,ga4_evt_tool_view,GA4 Event,tool_view,evt_leads,tool page ready,"tool,rows_available",none,none,2,P1,Product,T-09,to_build,/order /smartorder /customizedpackages
+T306,04 Tools&Instruments,ga4_evt_tool_row,GA4 Event,tool_row_edit + tool_row_copy,evt_leads,row change (debounce 400ms),"tool,row_index,field,brand_id,product_id",none,none,2,P1,Product,T-09,to_build,quick order 10-row grid
+T307,04 Tools&Instruments,ga4_evt_tool_total,GA4 Event,tool_total_change,evt_leads,totals change (debounce 800ms),"tool,lines_count,discount_toman,final_toman",none,none,2,P1,Product,T-05,to_build,
+T308,04 Tools&Instruments,ga4_evt_tool_submit,GA4 Event,tool_submit,evt_leads,add-to-cart from tool,"tool,lines_count,final_toman,discount_toman",cbk_block_test_orders,low,2,P0,Growth,T-09,to_build,key event
+T309,04 Tools&Instruments,ga4_evt_compare,GA4 Event,compare_view,evt_leads,/compare/brand interactions,"brands_compared[],systems[],dims_used",none,none,2,P2,Merch,T-09,to_build,competitive intel
+T310,04 Tools&Instruments,ga4_evt_installment,GA4 Event,installment_view,evt_leads,badge/plan clicked,"product_id,plan,amount_toman",none,none,2,P1,Finance,T-14,to_build,while /leasing-404/ broken only clicks
+T400,05 Media,ga4_evt_promo_view,GA4 Event,view_promo,custom_promo_view,slider/banner visible (25% sample),"creative_id,slot,brand_id",none,none,3,P2,Content,T-16,to_build,creative_id from /Photos/Sliders/{id}
+T401,05 Media,ga4_evt_promo_click,GA4 Event,select_promo,clk_link_ext/custom,banner click,"creative_id,slot,product_id",none,none,3,P1,Content,T-16,to_build,
+T402,05 Media,ga4_evt_file_download,GA4 Event,file_download,clk_download + evt_media,\.pdf|zip|rar|dme,"doc_type,file_ext,product_id,brand_id",none,none,3,P0,Content,T-09,to_build,catalog/pricelist/exocad/failure_form
+T403,05 Media,ga4_evt_video,GA4 Event,video_progress,custom_video,25/50/75/100,"percent,video_id,brand_id",none,none,3,P2,Content,T-15,to_build,homepage video tiles + Aparat embeds
+T404,03 Leads,ga4_evt_chat_click,GA4 Event,chat_click,clk_messenger,widget/messenger link,"channel,agent_id,page_type,product_id",cbk_block_preview,medium,3,P0,Sales,T-15,to_build,wa.me/t.me/ble.ir + tel
+T405,03 Leads,ga4_evt_phone_click,GA4 Event,phone_click,clk_messenger,tel: link,"extension,page_type",none,low,3,P1,Sales,T-15,to_build,header + footer + support widget numbers
+T406,05 Media,ga4_evt_content_share,GA4 Event,content_share,clk_link_ext/custom,share/copy click,"method,object_type,object_id",none,none,3,P2,Content,T-09,to_build,
+T407,05 Media,ga4_evt_review,GA4 Event,review_submit + rating_submit,evt_leads,comment/rating posted,"product_id,brand_id,rating_value,length_chars",none,low,3,P2,Content,T-09,to_build,zero-party
+T408,07 QA&Maintenance,ga4_evt_utm_missing,GA4 Event,utm_missing,tl_all_pages,no utm + external referrer,"referral,path",none,none,3,P1,Growth,T-18,to_build,campaign hygiene report
+T409,07 QA&Maintenance,ga4_evt_broken_link,GA4 Event,broken_link_click,clk_broken,known broken targets,"target,link_text",none,none,3,P2,FE,T-14,to_build,/leasing-404/ first
+T410,07 QA&Maintenance,ga4_evt_ux,GA4 Event,scroll_depth + web_vitals + rage_click + dead_click,tl_scroll/EV/custom,ux events,"percent,lcp,inp,cls,x,y,selector",cbk_block_internal,none,3,P2,FE,T-16,to_build,sampled 20% to GA4; full to BQ via sGTM
+T411,07 QA&Maintenance,ga4_evt_pwa,GA4 Event,pwa_prompt_show + pwa_install + pwa_prompt_dismiss,custom_pwa,beforeinstallprompt events,method,none,none,3,P2,FE,T-15,to_build,
+T500,06 Identity&Consent,html_linker_crossdomain,GA4 Config override,cross_domain,tl_all_pages,always,linker domains,none,none,4,P0,Data,T-11,to_build,club.titana.ir (+ fix http:// first)
+T501,99 Archive,pix_gads_base,Google Ads Remarketing,AW-XXXX,tl_all_pages,tg_enable_gads=true,page_view,cbk_block_internal,medium,4,P3,Growth,T-13,hold,ready but OFF until agency account confirmed
+T502,99 Archive,pix_gads_conv,Google Ads Conversion,AW-XXXX,evt_leads + evt_ecom,"quote_request,purchase","transaction_id,value",cbk_once_purchase,low,4,P3,Growth,T-04,hold,order_id as Google-enhanced-conversion-id
+T503,99 Archive,pix_meta,Meta Pixel,fbq,tl_all_pages + evt_ecom,"PageView,ViewContent,AddToCart,Lead,Purchase",cd[],cbk_block_internal,high,4,P3,Growth,T-17,hold,never forward items[].customer data
+T504,99 Archive,pix_local_networks,Yektanet/Reklamir/SnappAd,native,evt_leads + evt_ecom,conversion only,"order_id,value_toman",cbk_block_internal,medium,4,P3,Growth,T-05,optional,one conversion per network max
+T505,01 GA4,sgtm_ga4_forward,GA4 via sGTM,all,evt_any_titana,all routed to tms.titana.ir/g/collect,full payload,cbk_block_internal,low,4,P1,Data,T-18,to_build,server dedupe + raw tee to BQ
+T506,00 Core,html_offline_order_import,Custom HTML / webhook,order_enriched,custom_offline_import,only on confirm page (server-verified),"order_id,margin_toman,fixtures_units",cbk_block_test_orders,low,4,P1,Data,T-05,to_build,never trust browser for margin

@@ -1,0 +1,13 @@
+{
+  "name": "titana-analytics",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Titana data layer contract, tag plan and QA tooling (docs are the deliverable; scripts are tooling).",
+  "scripts": {
+    "qa": "node snippets/qa-validator.js fixtures/pushes.sample.json",
+    "qa:runner": "node snippets/qa-runner.js"
+  },
+  "devDependencies": {
+    "puppeteer": "^23.0.0"
+  }
+}

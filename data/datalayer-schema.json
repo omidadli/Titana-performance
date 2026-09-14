@@ -1,0 +1,265 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://titana.ir/schemas/datalayer-1.0.0.json",
+  "title": "Titana Data Layer contract v1.0.0",
+  "description": "قرارداد داده‌ی dataLayer + window.titana. هر فیلدی که اینجا نیست نباید به تگ‌ها داده شود. PII خام ممنوع.",
+  "type": "object",
+  "required": ["version", "env", "page"],
+  "properties": {
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "env": { "enum": ["prod", "staging", "dev"] },
+    "page": {
+      "type": "object",
+      "required": ["type", "path"],
+      "properties": {
+        "id": { "type": ["string", "null"] },
+        "type": {
+          "enum": ["home", "brand_listing", "category_listing", "package_listing", "price_band",
+                   "product_detail", "variant_selection", "basket", "checkout_step", "purchase_confirmation",
+                   "auth_gate", "tool_quick_order", "tool_smart_order", "tool_custom_package", "tool_compare",
+                   "content_brand", "content_review", "club", "finance", "error", "other"]
+        },
+        "title": { "type": ["string", "null"], "maxLength": 200 },
+        "url": { "type": "string" },
+        "path": { "type": "string" },
+        "brand_slug": { "type": ["string", "null"] },
+        "category_l1": { "type": ["string", "null"] },
+        "category_l2": { "type": ["string", "null"] },
+        "error_code": { "type": ["integer", "null"] },
+        "logged_in": { "type": "boolean" },
+        "currency": { "const": "IRR" },
+        "locale": { "const": "fa-IR" },
+        "rtl": { "const": true },
+        "source": { "enum": ["server", "dom"], "default": "dom" },
+        "template_bug": { "type": "boolean", "description": "true اگر placeholder خام مثل {Balance} رندر شده" }
+      }
+    },
+    "user": {
+      "type": ["object", "null"],
+      "additionalProperties": false,
+      "properties": {
+        "uid_hash": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$", "description": "sha256(salt+E.164...). هرگز شماره خام." },
+        "role": { "enum": ["dentist", "clinic", "lab", "other", "unknown"] },
+        "verification_state": { "enum": ["pending", "verified", "rejected", "unknown"] },
+        "city": { "type": ["string", "null"], "maxLength": 40 },
+        "province": { "type": ["string", "null"], "maxLength": 40 },
+        "org_type": { "enum": ["private_practice", "clinic", "lab", "hospital", "chain", "unknown"] },
+        "club_tier": { "enum": ["none", "bronze", "silver", "gold", "platinum", "unknown"] },
+        "implants_band": { "enum": ["unknown", "0-5", "6-15", "16-30", "31-60", "60+"] },
+        "primary_systems": { "type": "array", "items": { "type": "string" }, "maxItems": 8 },
+        "credit_limit_toman": { "type": ["integer", "null"], "minimum": 0 },
+        "is_new": { "type": "boolean" },
+        "first_order_date": { "type": ["string", "null"], "format": "date" },
+        "days_since_last_order": { "type": ["integer", "null"] }
+      }
+    },
+    "session": {
+      "type": ["object", "null"],
+      "properties": {
+        "id": { "type": ["string", "null"] },
+        "auth_state": { "enum": ["anonymous", "gated", "authenticated"] }
+      }
+    },
+    "product": {
+      "type": ["object", "null"],
+      "required": ["id"],
+      "properties": {
+        "id": { "type": "integer" },
+        "sku": { "type": ["string", "null"], "maxLength": 64 },
+        "name": { "type": "string", "maxLength": 200 },
+        "name_en": { "type": ["string", "null"] },
+        "product_family": {
+          "enum": ["fixture", "prosthesis", "healing_cover_screw", "kit", "cap_housing", "impression_coping",
+                   "lab_analog", "scan_body", "digital_analog", "implant_motor", "bone_material", "package", "other"]
+        },
+        "is_package": { "type": "boolean" },
+        "package_size": { "type": ["integer", "null"], "enum": [null, 30, 70, 100, 120, 150, 176, 200] },
+        "brand": {
+          "type": ["object", "null"],
+          "properties": {
+            "id": { "type": ["integer", "null"], "description": "FieldOptions.Id از سایت (dim-brand.csv)" },
+            "slug": { "type": ["string", "null"] },
+            "name_fa": { "type": ["string", "null"] },
+            "origin_group": { "enum": ["swiss", "german", "american", "italian", "korean", "iranian", "other", null] }
+          }
+        },
+        "system_id": { "type": ["string", "null"], "description": "کلید سازگاری/قفل‌شدگی؛ برای attach-rate الزامی" },
+        "platform": { "enum": ["narrow", "regular", "both", null] },
+        "diameter_mm": { "type": ["number", "null"] },
+        "length_mm": { "type": ["integer", "null"] },
+        "connection": { "type": ["string", "null"] },
+        "implant_type": { "enum": ["bone_level", "tissue_level", "one_piece", "zygomatic", "short", "ultra_narrow", "other", null] },
+        "surface": { "type": ["string", "null"], "maxLength": 20 },
+        "country_of_origin": { "type": ["string", "null"], "pattern": "^[A-Z]{2}$" },
+        "price_toman": { "type": ["integer", "null"], "minimum": 0, "description": "null اگر undisclosed" },
+        "compare_at_price_toman": { "type": ["integer", "null"] },
+        "discount_pct": { "type": ["number", "null"], "minimum": 0, "maximum": 100 },
+        "price_undisclosed": { "type": "boolean" },
+        "availability": { "enum": ["in_stock", "out_of_stock", "sourcing", "discontinued", "unknown"] },
+        "stock_units": { "type": ["integer", "null"], "minimum": 0 },
+        "installment_eligible": { "type": "boolean" },
+        "free_gift": {
+          "type": ["object", "null"],
+          "properties": {
+            "type": { "enum": ["surgical_kit", "prosthetic_kit", "fixtures", "motor_angle", "goods", "rial_discount"] },
+            "quantity": { "type": ["integer", "null"] },
+            "label": { "type": ["string", "null"], "maxLength": 100 }
+          }
+        },
+        "warranty": { "type": "array", "items": { "enum": ["filler_replacement", "unlimited_exchange", "30day_return", "same_day_delivery_tehran", "cod_tehran_mashhad"] } },
+        "documents": {
+          "type": "array", "maxItems": 12,
+          "items": {
+            "type": "object",
+            "required": ["type"],
+            "properties": {
+              "type": { "enum": ["catalog", "pricelist", "exocad_library", "tresoft_library", "failure_form", "other"] },
+              "url": { "type": "string" },
+              "ext": { "type": ["string", "null"] }
+            }
+          }
+        },
+        "rating": { "type": ["object", "null"], "properties": { "value": { "type": ["number", "null"] }, "count": { "type": "integer", "minimum": 0 } } },
+        "position_on_page": { "type": ["integer", "null"] },
+        "list": { "type": ["string", "null"], "maxLength": 80 }
+      }
+    },
+    "items": {
+      "type": ["array", "null"], "maxItems": 100,
+      "items": {
+        "type": "object",
+        "required": ["product_id", "quantity"],
+        "properties": {
+          "product_id": { "type": "integer" },
+          "item_name": { "type": ["string", "null"], "maxLength": 100 },
+          "variant_sku": { "type": ["string", "null"] },
+          "brand_id": { "type": ["integer", "null"] },
+          "system_id": { "type": ["string", "null"] },
+          "category": { "type": ["string", "null"] },
+          "price_toman": { "type": ["integer", "null"] },
+          "quantity": { "type": "integer", "minimum": 0 },
+          "free_quantity": { "type": "integer", "minimum": 0, "default": 0 },
+          "index": { "type": ["integer", "null"] },
+          "coupon": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "basket": {
+      "type": ["object", "null"],
+      "properties": {
+        "id": { "type": ["string", "null"] },
+        "currency": { "const": "IRR" },
+        "value_toman": { "type": "integer", "minimum": 0 },
+        "items_count": { "type": "integer", "minimum": 0, "description": "تعداد واحد (فیکسچر)" },
+        "line_count": { "type": "integer", "minimum": 0 },
+        "shipping_method": { "enum": ["express_free", "post", "courier", "cod", null] },
+        "cod_available": { "type": "boolean" },
+        "offer_type": { "type": ["string", "null"] },
+        "discount_toman": { "type": "integer", "minimum": 0 },
+        "free_items_value_toman": { "type": "integer", "minimum": 0 },
+        "installment": { "type": "boolean" }
+      }
+    },
+    "order": {
+      "type": ["object", "null"],
+      "required": ["id"],
+      "properties": {
+        "id": { "type": "string", "maxLength": 40 },
+        "date": { "type": ["string", "null"], "format": "date" },
+        "value_toman": { "type": "integer", "minimum": 0 },
+        "margin_toman": { "type": ["integer", "null"], "description": "فقط از سرور" },
+        "tax_toman": { "type": "integer", "minimum": 0 },
+        "shipping_toman": { "type": "integer", "minimum": 0 },
+        "discount_toman": { "type": "integer", "minimum": 0 },
+        "coupon": { "type": ["string", "null"] },
+        "payment_method": { "enum": ["online", "cod", "transfer", "credit_installment", "unknown"] },
+        "installment_plan": {
+          "type": ["object", "null"],
+          "properties": { "months": { "type": "integer" }, "downpayment_toman": { "type": "integer" } }
+        },
+        "fixtures_units": { "type": "integer", "minimum": 0, "description": "برای Share of Wallet" },
+        "is_first_order": { "type": "boolean" },
+        "city": { "type": ["string", "null"] },
+        "sla": { "type": ["string", "null"], "description": "T3H = تحویل ۳ ساعته تهران" }
+      }
+    },
+    "search": {
+      "type": ["object", "null"],
+      "properties": {
+        "term": { "type": ["string", "null"], "maxLength": 100 },
+        "category": { "type": ["string", "null"] },
+        "results_count": { "type": ["integer", "null"], "minimum": 0 },
+        "page_no": { "type": "integer", "minimum": 1 },
+        "items_per_page": { "type": ["integer", "null"] },
+        "sort": { "enum": ["price_asc", "price_desc", "best_selling", "newest", "popular", "special_offer", "unknown"] },
+        "price_range": { "type": ["object", "null"], "properties": { "min_toman": { "type": ["integer", "null"] }, "max_toman": { "type": ["integer", "null"] } } },
+        "filters": { "type": ["array", "null"], "items": { "type": "string" }, "maxItems": 12 }
+      }
+    },
+    "promo": {
+      "type": ["object", "null"],
+      "properties": {
+        "creative_id": { "type": ["string", "integer", "null"], "description": "از /Photos/Sliders/{id} یا /LandingPageItemMenus/{id}" },
+        "slot": { "enum": ["hero_slider", "brand_menu", "package_strip", "offer_tile", "sidebar", "other"] },
+        "name": { "type": ["string", "null"], "maxLength": 100 },
+        "position": { "type": ["integer", "null"] }
+      }
+    },
+    "tool": {
+      "type": ["object", "null"],
+      "properties": {
+        "tool": { "enum": ["quick_order", "smart_order", "custom_package", "compare", "review_rating"] },
+        "rows_available": { "type": ["integer", "null"] },
+        "rows_used": { "type": ["integer", "null"] },
+        "selected_brand_id": { "type": ["integer", "null"] },
+        "selected_line": { "type": ["string", "null"] }
+      }
+    },
+    "form": {
+      "type": ["object", "null"],
+      "properties": {
+        "id": { "type": "string", "maxLength": 60 },
+        "name": { "type": ["string", "null"], "maxLength": 80 },
+        "field_count": { "type": ["integer", "null"] },
+        "result": { "enum": ["ok", "error", null] },
+        "error_code": { "type": ["string", "null"] },
+        "time_to_complete_ms": { "type": ["integer", "null"] }
+      }
+    },
+    "content": {
+      "type": ["object", "null"],
+      "properties": {
+        "content_id": { "type": ["string", "integer", "null"] },
+        "content_type": { "enum": ["brand_landing", "review", "faq", "about", "policy", "referral", "affiliate", "contact", "other"] },
+        "brand_id": { "type": ["integer", "null"] },
+        "has_video": { "type": "boolean" },
+        "has_download": { "type": "boolean" }
+      }
+    },
+    "loyalty": { "type": ["object", "null"], "properties": { "points": { "type": ["integer", "null"] }, "tier": { "type": ["string", "null"] }, "next_tier_delta": { "type": ["integer", "null"] } } },
+    "credit": { "type": ["object", "null"], "properties": { "plan": { "type": ["string", "null"] }, "amount_toman": { "type": ["integer", "null"] }, "approved_limit_toman": { "type": ["integer", "null"] }, "status": { "enum": ["view", "eligibility", "submitted", "approved", "rejected", null] } } },
+    "error": { "type": ["object", "null"], "properties": { "code": { "type": ["integer", "string", "null"] }, "message": { "type": ["string", "null"], "maxLength": 200 } } }
+  },
+  "x-prohibited-keys": {
+    "description": "هر کلیدی با این الگوها باید قبل از ارسال حذف/رد شود (validator)",
+    "patterns": ["mobile", "phone", "national_id", "nid", "license_no", "system_no", "address", "postal", "patient", "patient_code", "national", "iban", "card_no", "birth"]
+  },
+  "x-events": [
+    "titana_page_view", "titana_search_results", "titana_site_search", "titana_product_impression",
+    "titana_product_click", "titana_product_detail", "titana_variant_index", "titana_variant_expand",
+    "titana_variant_select", "titana_add_to_cart", "titana_remove_from_cart", "titana_cart_view",
+    "titana_checkout_step", "titana_checkout_option", "titana_purchase", "titana_refund",
+    "titana_login_gate_hit", "titana_otp_send", "titana_otp_result", "titana_signup_success",
+    "titana_profile_complete", "titana_form_start", "titana_form_submit", "titana_quote_request",
+    "titana_callback_request", "titana_tool_view", "titana_tool_row_edit", "titana_tool_row_copy",
+    "titana_tool_total_change", "titana_tool_submit", "titana_compare_view", "titana_promo_view",
+    "titana_promo_click", "titana_file_download", "titana_video_progress", "titana_chat_click",
+    "titana_phone_click", "titana_notify_me_submit", "titana_availability_view", "titana_review_submit",
+    "titana_rating_submit", "titana_newsletter_subscribe", "titana_referral_share", "titana_referral_landing",
+    "titana_club_view", "titana_installment_view", "titana_credit_apply_submit", "titana_credit_approved",
+    "titana_order_track_view", "titana_return_request", "titana_warranty_claim", "titana_pwa_prompt_show",
+    "titana_pwa_prompt_accept", "titana_pwa_prompt_dismiss", "titana_content_share", "titana_utm_missing",
+    "titana_broken_link_click", "titana_scroll_depth", "titana_web_vitals", "titana_rage_click",
+    "titana_dead_click", "titana_error_view", "titana_schema_mismatch"
+  ]
+}

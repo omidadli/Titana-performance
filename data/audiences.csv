@@ -1,0 +1,13 @@
+﻿audience,ga4_definition,membership_days,use_in,owner,status
+aud_high_intent_7d,"quote_request OR tool_submit OR callback_request, no purchase",7,"retargeting/nurture, exclude from awareness",Growth,to_build
+aud_cart_abandon_48h,"view_cart, no purchase",1,WA/CRM reminder,CRM,to_build
+aud_gate_blocked_7d,"login_gate_hit >=1, no signup",7,open-gate test cohort,Product,to_build
+aud_oos_waiters,notify_me_submit,30,back-in-stock SMS,CRM,to_build
+aud_implants_16plus,"user:implants_band in (16-30,31-60,60+)",540,"priority sales, free kit offer",Sales,needs_profile_field
+aud_fixture_no_prostho,"purchase category=fixture, no prosthesis in 45d",45,cross-sell by system_id,Growth,to_build
+aud_churn_risk,user:days_since_last_order > 60,60,win-back,CRM,needs_import
+aud_brand_lovers_X,brand_id in (...) >=2 events,90,defense offers,Merch,to_build
+aud_installed_system,system_id on view_item/purchase,180,system-scoped cross-sell,Growth,to_build
+aud_pwa_installed,pwa_install,540,push notifications,Product,to_build
+excl_customers_180d,purchase,180,exclusion,Growth,to_build
+excl_internal,internal_traffic,30,exclusion,Data,to_build

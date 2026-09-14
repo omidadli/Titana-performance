@@ -1,0 +1,11 @@
+[
+  {"event":"gtm.js","gtm.start":1757000000000},
+  {"event":"titana_page_view","dl_ver":"1.0.0","dl_source":"server","page":{"type":"product_detail","path":"/product/626/avita-fixture-implant/","logged_in":false,"source":"server"},"product":{"id":626,"availability":"in_stock","price_toman":4200000}},
+  {"event":"titana_product_detail","product":{"id":626,"availability":"in_stock","price_undisclosed":false},"items":[{"product_id":626,"item_name":"فیکسچر اویتا","price":42000000000,"quantity":1,"index":0}],"value":42000000000,"currency":"IRR"},
+  {"event":"titana_login_gate_hit","blocked_action":"cart","target_page":"basket","product_id":626},
+  {"event":"titana_otp_result","result":"fail","error_code":"Eexpired_otp","method":"otp"},
+  {"event":"titana_add_to_cart","items":[{"product_id":626,"quantity":100}],"value":"420000000","currency":"IRR","source_page_type":"product_detail","user":{"mobile":"09106228634"}},
+  {"event":"titana_purchase","transaction_id":"T-4471","value":7800000000000,"currency":"IRR","items":[{"product_id":644,"quantity":100}],"tax":0,"shipping":0},
+  {"event":"titana_purchase","transaction_id":"T-4471","value":7800000000000,"currency":"IRR","items":[{"product_id":644,"quantity":100}]},
+  {"event":"some_random_event","x":1}
+]

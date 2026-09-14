@@ -1,0 +1,63 @@
+﻿event_id,datalayer_event,ga4_event,funnel,macro_or_micro,weight,trigger,required_params,optional_params,sampled,phase,status
+E01,titana_page_view,page_view,all,n/a,0,tl_all_pages,"page_type,page_path,logged_in","brand_slug,env,dl_ver",no,0,to_build
+E02,titana_search_results,view_search_results,listing,n/a,0,dom_ready + listing detect,"results_count,category,sort","price_range,page_no,items_per_page,filters",no,1,to_build
+E03,titana_site_search,site_search,listing,micro,2,form submit,term,results_count,no,2,to_build
+E04,titana_product_impression,view_item_list,B,n/a,0,IntersectionObserver,items[],"list,position",yes_10pct,6,to_build
+E05,titana_product_click,select_item,B,micro,3,link click on card,"product_id,list,position,placement",brand_id,no,1,to_build
+E06,titana_product_detail,view_item,B,n/a,0,dom_ready,"items[],value,currency","availability,undisclosed",no,1,to_build
+E07,titana_variant_index,variant_index_view,B,n/a,0,/model/ route or modal open,"product_id,variants_count",,no,3,to_build
+E08,titana_variant_expand,variant_list_expand,B,micro,3,checkbox toggle,product_id,,no,3,to_build
+E09,titana_variant_select,select_variant,B,micro,8,select/qty change,"product_id,diameter,length,platform,qty","price_toman,time_to_select_ms",no,3,to_build
+E10,titana_add_to_cart,add_to_cart,B/D,micro,20,server callback or button success,"items[],value,currency,source_page_type","cta_id,offer_type",no,3,to_build
+E11,titana_remove_from_cart,remove_from_cart,D,n/a,0,cart row delete,items[],reason,no,3,to_build
+E12,titana_cart_view,view_cart,D,n/a,0,/cart dom_ready,"line_count,items_count,value_toman",cod_available,no,3,to_build
+E13,titana_checkout_step,checkout_step,D,n/a,0,step change,"step,step_name","value,option",no,4,blocked_no_access
+E14,titana_checkout_option,add_shipping_info,D,micro,10,option change,"option_type,option",,no,4,blocked_no_access
+E15,titana_purchase,purchase,D,macro,100,confirm page + dedupe,"transaction_id,value,currency,items[]","tax,shipping,coupon,installment,fixtures_units",no,4,blocked_no_access
+E16,titana_refund,refund,post,n/a,-100,server/panel import,"transaction_id,value",reason,no,7,to_build
+E17,titana_login_gate_hit,login_gate_hit,A,diagnostic,0,modal open,"blocked_action,target_page",product_id,no,2,to_build
+E18,titana_otp_send,otp_send,A,micro,5,submit phone,method,"phone_valid,masked",no,2,to_build
+E19,titana_otp_result,otp_result,A,micro,10,verify response,result,"error_code,attempts",no,2,to_build
+E20,titana_signup_success,signup,A,macro,25,account created,"role,city",has_capacity_field,no,2,to_build
+E21,titana_profile_complete,profile_complete,A,macro,25,profile saved,"role,implants_band,org_type",primary_systems,no,2,to_build
+E22,titana_form_start,form_start,leads,n/a,0,first focus in form,"form_id,form_name,page_type",field_count,no,5,to_build
+E23,titana_form_submit,form_submit,leads,micro,5,ajax success/fail,"form_id,result","error_count,time_to_complete_ms",no,5,to_build
+E24,titana_quote_request,quote_request,C,macro,40,quote form submit,"product_id,package_size","offer_type,qty",no,5,to_build
+E25,titana_callback_request,callback_request,leads,macro,15,/form/callreq success,form_id,"preferred_time,page_type",no,5,to_build
+E26,titana_tool_view,tool_view,E,micro,5,tool page ready,tool,rows_available,no,5,to_build
+E27,titana_tool_row_edit,tool_row_edit,E,n/a,0,row field change (debounced),"tool,row_index,field","brand_id,product_id",no,5,to_build
+E28,titana_tool_row_copy,tool_row_copy,E,n/a,0,copy last row,"tool,row_index",,no,5,to_build
+E29,titana_tool_total_change,tool_total_change,E,n/a,0,totals recompute (800ms debounce),"tool,lines_count,final_toman",discount_toman,no,5,to_build
+E30,titana_tool_submit,tool_submit,E,macro,40,add to cart from tool,"tool,lines_count,final_toman",discount_toman,no,5,to_build
+E31,titana_compare_view,compare_view,E,micro,6,/compare used,brands_compared[],"systems,dims_used",no,5,to_build
+E32,titana_promo_view,view_promo,media,n/a,0,banner in view (25% sample),"creative_id,slot",promo_name,yes_25pct,6,to_build
+E33,titana_promo_click,select_promo,media,micro,3,banner click,"creative_id,slot",product_id,no,6,to_build
+E34,titana_file_download,file_download,media,micro,8,download click,"doc_type,file_ext","product_id,brand_id",no,5,to_build
+E35,titana_video_progress,video_progress,media,n/a,0, YT/Aparat/custom player,"percent,video_id","brand_id,autoplay",no,6,to_build
+E36,titana_chat_click,chat_click,leads,micro,5,messenger/widget click,channel,"agent_id,page_type,product_id",no,5,to_build
+E37,titana_phone_click,phone_click,leads,micro,5,tel: click,extension,page_type,no,5,to_build
+E38,titana_notify_me_submit,notify_me_submit,I,macro,20,back-in-stock form,"product_id,requested_qty",avg_price_toman,no,6,to_build
+E39,titana_availability_view,availability_view,diagnostic,n/a,0,PDP/ listing badge seen,"availability,stock_units",product_id,no,6,to_build
+E40,titana_review_submit,review_submit,social,micro,5,comment posted,"product_id,rating_value",length_chars,no,6,to_build
+E41,titana_rating_submit,rating_submit,social,micro,5,brand rating,"brand_id,rating_value",,no,6,to_build
+E42,titana_newsletter_subscribe,newsletter_subscribe,social,micro,4,footer email form,form_id,,no,6,to_build
+E43,titana_referral_share,referral_share,G,micro,4,share code,channel,code,no,7,to_build
+E44,titana_referral_landing,referral_landing,G,micro,8,arrival with referral code,code,,no,7,to_build
+E45,titana_club_view,club_view,G,micro,4,club dashboard view,"club_tier,points",,no,7,to_build
+E46,titana_installment_view,installment_view,F,micro,5,pricing w/ installment badge,"product_id,plan",,no,7,to_build
+E47,titana_credit_apply_submit,credit_apply,F,macro,40,credit application submitted,amount_toman,tier,no,7,to_build
+E48,titana_credit_approved,credit_approved,F,macro,60,panel import,"limit_toman,months",,no,8,to_build
+E49,titana_order_track_view,order_track_view,post,n/a,0,tracking form used,order_id_prefix,status,no,7,to_build
+E50,titana_return_request,return_request,post,n/a,0,return flow,reason,product_id,no,7,to_build
+E51,titana_warranty_claim,warranty_claim,post,n/a,0,failure form,type,brand_id,no,7,to_build
+E52,titana_pwa_prompt_show,pwa_prompt_show,ux,n/a,0,beforeinstallprompt,method,,no,6,to_build
+E53,titana_pwa_prompt_accept,pwa_install,ux,micro,4,accepted,method,,no,6,to_build
+E54,titana_content_share,content_share,social,micro,4,share/copy,"method,object_type",object_id,no,6,to_build
+E55,titana_utm_missing,utm_missing,qa,n/a,0,landing w/o utm + external referrer,"referral,path",,no,1,to_build
+E56,titana_broken_link_click,broken_link_click,qa,n/a,0,click to known-broken target,target,link_text,no,6,to_build
+E57,titana_scroll_depth,scroll_depth,ux,n/a,0,thresholds,percent,page_type,yes_20pct,6,to_build
+E58,titana_web_vitals,web_vitals,ux,n/a,0,onLCP/INP/CLS,"lcp,inp,cls,txn_id",page_type,yes_20pct,6,to_build
+E59,titana_rage_click,rage_click,ux,n/a,0,>=3 clicks /400px /500ms,"x,y,selector",tag_target,no,6,to_build
+E60,titana_dead_click,dead_click,ux,n/a,0,click no nav/no DOM change,selector,cursor,no,6,to_build
+E61,titana_error_view,error_view,qa,n/a,0,404/500 title or data,error_code,from,no,1,to_build
+E62,titana_schema_mismatch,schema_mismatch,qa,n/a,0,required param missing,missing_keys,event_name,no,1,to_build

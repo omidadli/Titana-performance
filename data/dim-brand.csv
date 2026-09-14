@@ -1,0 +1,26 @@
+﻿brand_field_option_id,brand_value_id,name_fa,slug,origin_group,landing_path,data_note
+223,10,ایمپلنت سوئیس(implantswiss),implantswiss,swiss,/search/implantswiss-dental-implant-system/,
+451,22,SIC,sic,swiss,/search/sic-dental-implant-system/,content page /sic-implant/
+501,27,روت (ROOTT),roott,swiss,/search/roott-dental-implant-system/,content page /roott-implant/
+534,34,SGS,sgs,swiss,/search/sgs-dental-implant-system/,content page /sgs-implant/
+528,32,بایومیت سوئیس (Biomate swiss),biomateswiss,swiss,/search/biomateswiss-dental-implant-system/,
+470,24,TRI,tri,swiss,/search/tri-dental-implant-system/,content page /tri-implant/
+404,20,بردنت(Bredent),bredent,german,/search/bredent-dental-implant-system/,content page /bredent/
+514,28,نکسیس (Naxis),naxis,german,/search/naxis-dental-implant-system/,⚠ value 28 duplicated with DRI; use Id
+488,25,زیمر بایومت(ZimVie),zimmer,american,/search/zimmer-dental-implant-system/,site labels as Zimmer Biomet / ZimVie
+540,35,رسیستا (RESISTA),resista,italian,/search/resista-dental-implant-system/,
+333,13,دنتیوم(Dentium),dentium,korean,/search/dentium-dental-implant-system/,
+559,38,آروم (Arum),arum,korean,/search/arum-dental-implant-system/,
+574,41,وارانتک (Warantec),warantec,korean,/search/warantec-dental-implant-system/,
+533,33,استریوس (Steri-Oss),steri-oss,korean,/search/steri-oss-dental-implant-system/,
+565,40,CSM,csm,korean,/search/csm-dental-implant-system/,
+515,30,سوون مدیکس (Sewon Medix),sewonmedix,korean,/search/sewonmedix-dental-implant-system/,
+577,42,سیمفونی (Symphony),symphony,korean,/search/symphony-dental-implant-system/,newest brand in nav
+388,18,لونا اس(Luna S),luna,korean,/search/luna-dental-implant-system/,content page /luna-s/
+561,39,پوینت (Point),point,korean,/search/point-dental-implant-system/,
+554,36,تی استرانگ (T.STRONG),tstrong,korean,/search/tstrong-dental-implant-system/,
+343,16,آی دو بایوتک (I.Do),ido,korean,/search/ido-dental-implant-system/,
+395,19,بایوجنسیس(G.DIFF),gdiff-biogenesis,korean,/search/gdiff-biogenesis-dental-implant-system/,content page /gdiff/
+512,28,DRI,dri,iranian,/search/dri-dental-implant-system/,⚠ value 28 duplicated with Naxis; use Id
+556,37,اویتا (Avita),avita,iranian,/search/avita-dental-implant-system/,content page /avita...
+499,26,DPI,dpi,iranian,/search/dpi-dental-implant-system/,

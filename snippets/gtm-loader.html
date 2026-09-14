@@ -1,0 +1,123 @@
+<!-- ════════════════════════════════════════════════════════════════════════
+  Titana — GTM + DataLayer install (مسیر A: سروری، توصیه‌شده)
+  جایگذاری: مستقیم در <head> قالب (یا «کد سفارشی هدر» فروشگاه‌ساز)
+  ترتیب الزامی:  ۱) island داده  ۲) dataLayer bootstrap  ۳) GTM loader  ۴) shim (اختیاری)
+════════════════════════════════════════════════════════════════════════ -->
+
+<!-- ① Island داده‌ی صفحه — تنها چیزی که از فنی می‌خواهید. بقیه را shim خودش پر می‌کند.
+     ⚠ مقدارها را سمت سرور escape کنید (JSON.stringify)؛ هیچ فیلد PII خام اینجا نباشد. -->
+<script type="application/json" id="titana-data">
+{
+  "page": {
+    "type": "{{ .PageType }}",              /* home|product_detail|listing|... از سند ۰۳ */
+    "path": "{{ .Path }}",
+    "brand_slug": {{ .BrandSlug | json }},
+    "logged_in": {{ .IsLoggedIn }},
+    "source": "server"
+  },
+  "user": {{ if .IsLoggedIn }}{
+    "uid_hash": "{{ .MobileHash }}",        /* sha256(salt + E.164 mobile) — نه خودِ شماره */
+    "role": "{{ .Role }}",
+    "city": "{{ .City }}",
+    "province": "{{ .Province }}",
+    "org_type": "{{ .OrgType }}",
+    "club_tier": "{{ .ClubTier }}",
+    "implants_band": "{{ .ImplantsBand }}", /* 0-5|6-15|16-30|31-60|60+|unknown */
+    "verification_state": "{{ .VerifyState }}"
+  }{{ else }}null{{ end }},
+  "product": {{ if .Product }}{
+    "id": {{ .Product.Id }},
+    "name": {{ .Product.Name | json }},
+    "product_family": "{{ .Product.Family }}",
+    "is_package": {{ .Product.IsPackage }},
+    "package_size": {{ .Product.PackageSize }},
+    "brand": { "id": {{ .Product.BrandFieldOptionId }}, "slug": {{ .Product.BrandSlug | json }} },
+    "system_id": {{ .Product.SystemId | json }},
+    "price_toman": {{ if .Product.PriceIsZero }}null{{ else }}{{ .Product.PriceToman }}{{ end }},
+    "price_undisclosed": {{ .Product.PriceIsZero }},
+    "availability": "{{ .Product.Availability }}",   /* in_stock|out_of_stock|sourcing */
+    "stock_units": {{ .Product.StockUnits }},
+    "installment_eligible": {{ .Product.HasInstallment }}
+  }{{ else }}null{{ end }},
+  "basket": null,
+  "order": null
+}
+</script>
+
+<!-- ② bootstrap + رویداد صفحه -->
+<script>
+window.dataLayer = window.dataLayer || [];
+(function () {
+  var iso = document.getElementById("titana-data"), d = {};
+  try { d = JSON.parse(iso.textContent); } catch (e) { }
+  d.version = "1.0.0"; d.env = "prod";
+  window.titana = d;
+  dataLayer.push({
+    event: "titana_page_view",
+    page: d.page, user: d.user || undefined, product: d.product || undefined,
+    page_type: (d.page || {}).type, dl_ver: "1.0.0", dl_source: "server", currency: "IRR"
+  });
+  if (d.page && d.page.type === "product_detail" && d.product) {
+    dataLayer.push({
+      event: "titana_product_detail", page: d.page, product: d.product,
+      items: [{ product_id: d.product.id, item_name: d.product.name, brand_id: d.product.brand && d.product.brand.id,
+                system_id: d.product.system_id, category: d.product.product_family,
+                price: d.product.price_toman ? d.product.price_toman * 10000 : undefined, quantity: 1, index: 0 }],
+      value: d.product.price_toman ? d.product.price_toman * 10000 : undefined, currency: "IRR"
+    });
+  }
+})();
+</script>
+
+<!-- ③ Google Tag Manager (Container: titana.ir — جای GTM-XXXXXX را بگذارید) -->
+<script>(function (w, d, s, l, i) { w[l] = w[l] || []; w[l].push({ "gtm.start": new Date().getTime(), event: "gtm.js" }); var f = d.getElementsByTagName(s)[0], j = d.createElement(s), dl = l != "dataLayer" ? "&l=" + l : ""; j.async = true; j.src = "https://www.googletagmanager.com/gtm.js?id=" + i + dl; f.parentNode.insertBefore(j, f); })(window, document, "script", "dataLayer", "GTM-XXXXXX");</script>
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXXXX" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+
+<!-- ④ (فقط اگر هنوز داده‌ی سروریِ کامل ندارید) لایه‌ی تکمیلی:
+     رویدادهای تعاملی، فرم‌ها، OTP، بنر، دانلود، چت، rage-click را خودش می‌سازد. -->
+<script async src="/js/titana-datalayer.js"></script>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+  ⑤ صفحه‌ی «تأیید سفارش» — مهم‌ترین بلوک؛ dedupe سمت سرور الزامی است.
+     هرگز این بلاک را از DOM نسازید. `rendered` باید یک‌بار در session قفل شود.
+════════════════════════════════════════════════════════════════════════ -->
+{{ if eq .PageType "purchase_confirmation" }}
+<script>
+(function () {
+  var o = window.titana && window.titana.order; if (!o || !o.id) return;
+  try { if (sessionStorage.getItem("titana_p_" + o.id)) return; sessionStorage.setItem("titana_p_" + o.id, "1"); } catch (e) { }
+  dataLayer.push({
+    event: "titana_purchase",
+    ecommerce: null,
+    transaction_id: o.id,
+    value: Math.round(o.value_toman * 10000),        /* GA4: ریال */
+    value_toman: o.value_toman,                      /* گزارش داخلی: تومان */
+    tax: (o.tax_toman || 0) * 10000,
+    shipping: (o.shipping_toman || 0) * 10000,
+    coupon: o.coupon || undefined,
+    currency: "IRR",
+    payment_method: o.payment_method,
+    fixtures_units: o.fixtures_units,
+    installment: !!o.installment_plan,
+    page_type: "purchase_confirmation", dl_ver: "1.0.0", dl_source: "server",
+    items: (o.items || []).slice(0, 50).map(function (i, k) {
+      return { item_id: String(i.product_id), item_name: i.name, item_brand: i.brand_slug, item_category: i.category,
+               item_variant: i.variant_sku, index: k, quantity: i.qty, price: i.unit_price_toman * 10000,
+               system_id: i.system_id, free_quantity: i.free_qty || 0 };
+    })
+  });
+})();
+</script>
+{{ end }}
+
+<!-- ════════════════════════════════════════════════════════════════════════
+  ⑥ باشگاه مشتریان (club.titana.ir) — همین قطعه را در قالب کلاب هم بگذارید
+     + در GTM:GA4 Config → linker domains: ["titana.ir","club.titana.ir"]
+     ⚠ پیش‌نیاز: لینک منو باید https شود (الان http://club.titana.ir/dashboard است)
+════════════════════════════════════════════════════════════════════════ -->
+<script>
+window.dataLayer = window.dataLayer || [];
+dataLayer.push({ event: "gtm.js", "gtm.start": Date.now() });
+gtag && gtag("set", "linker", { domains: ["titana.ir", "www.titana.ir"] }); /* اگر gtag مستقیم دارید */
+dataLayer.push({ event: "titana_club_view", page: { type: "club", path: location.pathname, source: "server" } });
+</script>
